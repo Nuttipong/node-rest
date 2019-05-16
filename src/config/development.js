@@ -1,7 +1,8 @@
-var config = {
+const config = {
     env: 'development',
     port: 8080,
-    logging: true
+    logging: true,
+    dbFile: 'storage.dev.db'
 };
 
 module.exports = config;

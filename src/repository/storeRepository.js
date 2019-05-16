@@ -1,5 +1,3 @@
-var Promise = require('bluebird');
-
 class StoreRepository {
     constructor(dao) {
         if (!StoreRepository.dao) {
@@ -22,6 +20,8 @@ class StoreRepository {
         return new Promise((resolve, reject) => {
             StoreRepository.dao.get(sql, [key], (err, result) => {
                 if (err) {
+                    console.log('Error running sql ' + sql);
+                    console.log(err);
                     reject(error);
                 } else {
                     resolve(result);
@@ -33,22 +33,21 @@ class StoreRepository {
         });
     }
 
-    async insertOrUpdate(payload) {
-        var hasKey = await this.getByKey(payload.key);
-        var sql = ``;
-        if (hasKey) {
-            sql = `UPDATE tbl_store
-                SET key = ?,
-                    value = ?,
-                    modifyDate = ?
-                WHERE key = ?
-                `;
-        } else {
-            sql = `INSERT INTO tbl_store (key, value, createDate)
-                VALUES (?)
-            `;
-        }
-        return StoreRepository.dao.run(sql, [payload.key, payload.value, payload.timestamp]);
+    insertOrUpdate(payload) {
+        const { value, timestamp, key } = payload;
+        let sql = ``;
+        return this.getByKey(key)
+            .then((hasKey) => {
+                if (hasKey) {
+                    const modifyDate = timestamp;
+                    sql = `UPDATE tbl_store SET value = (?), modifyDate =(?) WHERE key = (?);`;
+                    return StoreRepository.dao.run(sql, [value, modifyDate, key]);
+                } else {
+                    const createDate = timestamp;
+                    sql = `INSERT INTO tbl_store (key, value, createDate) VALUES (?, ?, ?);`;
+                    return StoreRepository.dao.run(sql, [key, value, createDate]);
+                }                
+            });
     }
 }
 

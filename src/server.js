@@ -1,15 +1,16 @@
-var express = require('express');
-var app = express();
-var controllers = require('./controllers');
+const express = require('express');
+const app = express();
+const apiRouter = require('./controllers');
 
 // setup the app middleware
 require('./middleware/appMiddleware')(app);
 
 // setup database
-require('./dao');
+require('./repository/dao');
 
-// map the routes
-controllers.init(app);
+// setup the api
+const router = apiRouter.createRoute();
+app.use('/api', router);
 
 // export the app for testing
 module.exports = app;

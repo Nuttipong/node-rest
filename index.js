@@ -1,10 +1,10 @@
 
-var config = require('./src/config');
-var app = require('./src/server');
+const config = require('./src/config');
+const app = require('./src/server');
 
 // logger is a wrapper around console.log that adds color
 // logs object as a json and ability to turn off
-var logger = require('./src/utils/logger');
+const logger = require('./src/utils/logger');
 
 // start app
 app.listen(config.port, (err) => {
@@ -13,4 +13,4 @@ app.listen(config.port, (err) => {
     }
 });
 
-logger.log('listening on http://localhost:' + config.port);
+logger.log('Listening on http://localhost:' + config.port);

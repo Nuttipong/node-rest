@@ -1,9 +1,18 @@
 (function (controllers) {
 
-    var storeController = require('./store/storeController');
+    controllers.createRoute = function () {
 
-    controllers.init = function (app) {
-        storeController.init(app);
+        const router = require('express').Router();
+        const storeRoute = require('./store/storeController');
+
+        router.use('/store', storeRoute);
+
+        return router;
     };
 
-})(module.exports);
+})(module.exports)
+
+
+
+
+

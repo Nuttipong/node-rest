@@ -1,48 +1,40 @@
-(function (storeController) {
+// import lib
+const router = require('express').Router();
+const _ = require('lodash');
 
-    var StoreRepository = require('../../repository/storeRepository');
-    // var validation = require('../../repository/storeValidation');
-    var TimeService = require('../../services/timeService');
-    var _ = require('lodash');
-    
-    storeController.init = function (app) {
+// import validations, services, repositories and so on
+const StoreRepository = require('../../repository/storeRepository');
+const TimeService = require('../../services/timeService');
 
-        var repo = new StoreRepository();
+// new instance
+const timeService = new TimeService();
+const storeRepository = new StoreRepository();
 
-        app.get('/v1/api/store/', function(req, res) {
+router.get('/:key', function (req, res) {
+    const key = req.params.key;
+    storeRepository.getByKey(key)
+        .then((results) => {
             res.setHeader('Content-Type', 'application/json');
             res.status(200);
-            res.json(keys);
+            res.json(results || []);
         });
+});
 
-        app.get('/v1/api/store/:key/', function(req, res) {
-            var key = req.params.key;
+router.post('/', function (req, res) {
+    const dto = Object.entries(req.body)[0];
+    const payload = {
+        key: dto[0],
+        value: dto[1],
+        timestamp: timeService.getCurrentUnixTime(Date.now())
+    };
+    storeRepository.insertOrUpdate(payload)
+        .then((result) => {
+            var objResult = _.assign({}, payload);
 
-            repo.getByKey(key)
-                .then((results) => {
-                    res.setHeader('Content-Type', 'application/json');
-                    res.status(200);
-                    res.json(results || []);
-                });
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200);
+            res.json(objResult);
         });
-        
-        app.post('/v1/api/store/', function(req, res) {
-            var obj = Object.entries(req.body)[0];
-            var payload = {
-                key: obj[0],
-                value: obj[1],
-                timestamp: TimeService.getCurrentUnixTime(Date.now())
-            };
+});
 
-            repo.insertOrUpdate(payload)
-                .then((result) => {
-                    var objResult = _.assign({}, payload);
-
-                    res.setHeader('Content-Type', 'application/json');
-                    res.status(200);
-                    res.json(objResult);
-                });
-        });
-    }
-
-})(module.exports);
+module.exports = router;
