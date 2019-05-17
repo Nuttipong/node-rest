@@ -1,45 +1,20 @@
-(function () {
+import Database from './database';
+import Logger from '../../utils/logger';
 
-    const Promise = require('bluebird');
-    const logger = require('../../utils/logger');
-    const Database = require('./database');
-    const database = new Database().getInstance();
+export default class AppDao {
+    constructor () {
+        this.database = new Database().getInstance();
+        this.logger = new Logger().getInstance();
+    }
 
-    // create all repositories
-    const StoreRepository = require('../storeRepository');
-
-    function seedDatabase() {
-
-        database.getDb(function (err, theDb) {
-            if (err) {
-                logger.log('Could not connect to database', err);
+    seedDatabase() {
+        const self = this;
+        self.database.getDb((err, theDb) => {
+            if (err || !theDb) {
+                self.logger.log('Could not connect to database', err);
             } else {
-                logger.log('Connected to database');
-
-                if (config.env === 'staging')
-                    dropTable();
-
-                const storeRepository = new StoreRepository(theDb);
-
-                // create table as parallel
-                Promise.all([
-                    storeRepository.createTable(),
-                    // table 2,
-                    // table 3
-                ])
-                .then((tasks) => {
-                    if (tasks) {
-                        logger.log('All tasks finished');
-                    }
-                });
+                self.logger.log('Connected to database');
             }
         });
     }
-
-    async function dropTable() {
-        await database.dropAll();
-    }
-
-    seedDatabase();
-
-})(module.exports);
+}

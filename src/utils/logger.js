@@ -1,22 +1,35 @@
-require('colors');
-var _ = require('lodash');
-var config = require('../config');
+import 'colors';
+import Config from '../config/index';
 
-var consoleLog = config.logging ? console.log.bind(console) : {};
-var logger = {
-    log: function() {
-        var args = _.toArray(arguments)
-                    .map((arg) => {
-                        if (typeof(arg) === 'object') {
-                            return JSON.stringify(arg).yellow;
-                        } else {
-                            arg += '';
-                            return arg.yellow;
-                        }
-                    });
-        if (consoleLog.apply)
-            consoleLog.apply(console, args);
+class Logger {
+    constructor () {
+        if (!Logger.instance) {
+
+            this.config = new Config();
+            this.consoleLog = this.config.logging ? console.log.bind(console) : {};
+
+            Logger.instance = this;
+        }
     }
-};
 
-module.exports = logger;
+    getInstance () {
+        return Logger.instance;
+    }
+
+    log() {
+        const args = Array.from(arguments)
+                          .map((arg) => {
+                            if (typeof(arg) === 'object') {
+                                return JSON.stringify(arg).green;
+                            } else {
+                                arg += '';
+                                return arg.green;
+                            }
+                          });
+
+        if (this.consoleLog.apply)
+            this.consoleLog.apply(console, args);
+    }
+}
+
+module.exports = Logger;

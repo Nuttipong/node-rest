@@ -1,16 +1,18 @@
-(function (controllers) {
+import express from 'express';
+import StoreController from './store/storeController';
 
-    controllers.createRoute = function () {
+export default class Router {
+    constructor () {
+        // create app router
+        this.routes = express.Router();
+        
+        // create all controller
+        this.storeController = new StoreController();
 
-        const router = require('express').Router();
-        const storeRoute = require('./store/storeController');
-
-        router.use('/store', storeRoute);
-
-        return router;
-    };
-
-})(module.exports)
+        // map routes
+        this.routes.use('/store', this.storeController.router);
+    }
+}
 
 
 

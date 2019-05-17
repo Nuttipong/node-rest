@@ -1,8 +1,6 @@
-class StoreRepository {
-    constructor(dao) {
-        if (!StoreRepository.dao) {
-            StoreRepository.dao = dao;
-        }
+export default class StoreRepository {
+    constructor (dao) {
+        this.dao = dao.theDb || null;
     }
 
     createTable() {
@@ -12,15 +10,28 @@ class StoreRepository {
             createDate INTEGER,
             modifyDate INTEGER
         )`;
-        return StoreRepository.dao.run(sql);
+        return new Promise((resolve, reject) => {
+            this.dao.run(sql, (err) => {
+                if (!err) {
+                    console.log('Error running sql', sql);
+                    console.log(err);
+                    reject(err);
+                } else {
+                    resolve('success');
+                }
+            });
+        })
+        .catch((err) => {
+            throw err;
+        });
     };
 
     getByKey(key) {
         var sql = `SELECT * FROM tbl_store WHERE key = ?`;
         return new Promise((resolve, reject) => {
-            StoreRepository.dao.get(sql, [key], (err, result) => {
+            this.dao.get(sql, [key], (err, result) => {
                 if (err) {
-                    console.log('Error running sql ' + sql);
+                    console.log('Error running sql', sql);
                     console.log(err);
                     reject(error);
                 } else {
@@ -36,19 +47,33 @@ class StoreRepository {
     insertOrUpdate(payload) {
         const { value, timestamp, key } = payload;
         let sql = ``;
-        return this.getByKey(key)
-            .then((hasKey) => {
-                if (hasKey) {
-                    const modifyDate = timestamp;
-                    sql = `UPDATE tbl_store SET value = (?), modifyDate =(?) WHERE key = (?);`;
-                    return StoreRepository.dao.run(sql, [value, modifyDate, key]);
-                } else {
-                    const createDate = timestamp;
-                    sql = `INSERT INTO tbl_store (key, value, createDate) VALUES (?, ?, ?);`;
-                    return StoreRepository.dao.run(sql, [key, value, createDate]);
-                }                
-            });
+        return new Promise((resolve, reject) => {
+            this.getByKey(key)
+                .then((hasKey) => {
+
+                    const next = (sql, err) => {
+                        if (err) {
+                            console.log('Error running sql', sql);
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            resolve('success');
+                        }
+                    };
+
+                    if (hasKey) {
+                        const modifyDate = timestamp;
+                        sql = `UPDATE tbl_store SET value = (?), modifyDate =(?) WHERE key = (?);`;
+                        this.dao.run(sql, [value, modifyDate, key], (err) => next(sql, err));
+                    } else {
+                        const createDate = timestamp;
+                        sql = `INSERT INTO tbl_store (key, value, createDate) VALUES (?, ?, ?);`;
+                        this.dao.run(sql, [key, value, createDate], (err) => next(sql, err));
+                    }                
+                });
+        })
+        .catch((err) => {
+            throw err;
+        });
     }
 }
-
-module.exports = StoreRepository;

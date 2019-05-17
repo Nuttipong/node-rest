@@ -1,13 +1,9 @@
 // setup global middleware
-var morgan = require('morgan');
-var bodyParser = require('body-parser');
-var error = require('./erorr');
+import morgan from 'morgan';
+import bodyParser from 'body-parser';
 
 module.exports = function(app) {
     app.use(morgan('dev'));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
-
-    // setup global error handling
-    app.use(error);
 };

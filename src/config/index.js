@@ -1,7 +1,14 @@
-var _ = require('lodash');
-var config = {
+import _ from 'lodash';
+const config = {
     env: process.env.NODE_ENV || 'development'
 };
-var envConfig = require(('./' + config.env).trim().toLowerCase());
+const envConfig = require(('./' + config.env).trim().toLowerCase());
 
-module.exports = _.assign(config, envConfig || {});
+export default class Config {
+    constructor () {
+        this.env = envConfig.env;
+        this.port = envConfig.port;
+        this.logging = envConfig.logging;
+        this.dbFile = envConfig.dbFile;
+    }
+}
