@@ -9,21 +9,33 @@ export default class StoreController {
         this.router = express.Router();
         this.dao = new Database().getInstance();
         this.storeRepository = new StoreRepository(this.dao);
+        this.storeRepository.createTable();
         this.timeService = new TimeService();
 
         // GET
-        this.router.get('/:key', (req, res) => {
+        this.router.get('/:key', (req, res, next) => {
             const key = req.params.key;
+
             this.storeRepository.getByKey(key)
-                .then((results) => {
-                    res.setHeader('Content-Type', 'application/json');
-                    res.status(200);
-                    res.json(results || []);
+                .then((result) => {
+                    try {
+                        res.status(200);
+                        if (!result) { res.json({}); return; }
+                        res.json({
+                            key: result.key,
+                            value: result.value,
+                            timestamp: result.modifyDate
+                        });
+                    } catch (err) {
+                        next(err);
+                    }
+                }, (err) => {
+                    next(err);
                 });
         });
 
         // POST & UPDATE
-        this.router.post('/', (req, res) => {
+        this.router.post('/', (req, res, next) => {
             const dto = Object.entries(req.body)[0];
             const timestamp = this.timeService.getCurrentUnixTime(Date.now());
             const payload = {
@@ -32,19 +44,12 @@ export default class StoreController {
                 timestamp: timestamp
             };
             this.storeRepository.insertOrUpdate(payload)
-                .then((result) => {
-                    let objResult, statusCode;
-                    if (result === 'success') {
-                        statusCode = 200;
-                        objResult = Object.assign({}, payload);
-                    } else {
-                        statusCode = 500;
-                        objResult = result;
-                    }
-
-                    res.setHeader('Content-Type', 'application/json');
-                    res.status(statusCode);
-                    res.json(objResult);
+                .then(() => {
+                    res.status(200);
+                    res.json(Object.assign({}, payload));
+                }, (err) => {
+                    res.status(500);
+                    res.json(err);
                 });
         });
     }

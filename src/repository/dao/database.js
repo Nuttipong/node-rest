@@ -28,22 +28,6 @@ export default class Database {
                 }
             });
         }
-
         next(null, this.theDb);
-    }
-
-    dropAll () {
-        return new Promise((resolve, reject) => {
-            const sql = `DROP TABLE IF EXISTS tbl_store;`;
-            return this.theDb.run(sql, (err) => {
-                if (err) {
-                    console.log('Error running sql ' + sql);
-                    console.log(err);
-                    reject(err);
-                } else {
-                    resolve(null);
-                }
-            });
-        });
     }
 }

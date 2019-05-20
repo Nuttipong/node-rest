@@ -1,7 +1,7 @@
 
 import Config from './config';
 import Logger from './utils/logger';
-import app from './server';
+import app from './app';
 
 const config = new Config();
 const logger = new Logger().getInstance();

@@ -1,5 +1,5 @@
 import 'colors';
-import Config from '../config/index';
+import Config from '../config';
 
 class Logger {
     constructor () {
@@ -26,7 +26,6 @@ class Logger {
                                 return arg.green;
                             }
                           });
-
         if (this.consoleLog.apply)
             this.consoleLog.apply(console, args);
     }

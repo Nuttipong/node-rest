@@ -1,6 +1,5 @@
-import devEnv from './development';
-import stagingEnv from './staging';
-import { expect } from 'chai';
+import devEnv from '../../src/config/development';
+import stagingEnv from '../../src/config/staging';
 
 describe('Config', () => {
 
@@ -12,8 +11,9 @@ describe('Config', () => {
             logging: true,
             dbFile: 'storage.db'
         };
+
         // then
-        expect(devEnv).to.deep.equal(config);
+        expect(devEnv).toEqual(config);
     });
 
     it('should return staging environment as expected', () => {
@@ -24,8 +24,9 @@ describe('Config', () => {
             logging: false,
             dbFile: 'storage.test.db'
         };
+        
         // then
-        expect(stagingEnv).to.deep.equal(config);
+        expect(stagingEnv).toEqual(config);
     });
 
 });
